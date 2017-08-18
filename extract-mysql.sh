@@ -3,7 +3,7 @@
 export LC_ALL=C
 
 backup_owner="backup"
-encryption_key_file="/backups/mysql/encryption_key"
+#encryption_key_file="/backups/mysql/encryption_key"
 log_file="extract-progress.log"
 number_of_args="${#}"
 processors="$(nproc --all)"
@@ -33,9 +33,9 @@ sanity_check () {
     fi
     
     # Check whether the encryption key file is available
-    if [ ! -r "${encryption_key_file}" ]; then
-        error "Cannot read encryption key at ${encryption_key_file}"
-    fi
+    #if [ ! -r "${encryption_key_file}" ]; then
+    #    error "Cannot read encryption key at ${encryption_key_file}"
+    #fi
 }
 
 do_extraction () {
@@ -48,16 +48,16 @@ do_extraction () {
         # Extract the directory structure from the backup file
         mkdir --verbose -p "${restore_dir}"
         xbstream -x -C "${restore_dir}" < "${file}"
-
+            #"--decrypt=AES256"
+            #"--encrypt-key-file=${encryption_key_file}"
         innobackupex_args=(
             "--parallel=${processors}"
-            "--decrypt=AES256"
-            "--encrypt-key-file=${encryption_key_file}"
             "--decompress"
         )
 
-        innobackupex "${innobackupex_args[@]}" "${restore_dir}"
-        find "${restore_dir}" -name "*.xbcrypt" -exec rm {} \;
+        #innobackupex "${innobackupex_args[@]}" "${restore_dir}"
+        mariabackup "${innobackupex_args[@]}" "${restore_dir}"
+        #find "${restore_dir}" -name "*.xbcrypt" -exec rm {} \;
         find "${restore_dir}" -name "*.qp" -exec rm {} \;
     
         printf "\n\nFinished work on %s\n\n" "${file}"

@@ -47,7 +47,7 @@ do_extraction () {
     
         # Extract the directory structure from the backup file
         mkdir --verbose -p "${restore_dir}"
-        xbstream -x -C "${restore_dir}" < "${file}"
+        mbstream -x -C "${restore_dir}" < "${file}"
             #"--decrypt=AES256"
             #"--encrypt-key-file=${encryption_key_file}"
         innobackupex_args=(

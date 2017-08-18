@@ -8,7 +8,7 @@ parent_dir="/backups/mysql"
 defaults_file="/etc/mysql/backup.cnf"
 todays_dir="${parent_dir}/$(date +%a)"
 log_file="${todays_dir}/backup-progress.log"
-encryption_key_file="${parent_dir}/encryption_key"
+#encryption_key_file="${parent_dir}/encryption_key"
 now="$(date +%m-%d-%Y_%H-%M-%S)"
 processors="$(nproc --all)"
 
@@ -27,24 +27,26 @@ sanity_check () {
     fi
     
     # Check whether the encryption key file is available
-    if [ ! -r "${encryption_key_file}" ]; then
-        error "Cannot read encryption key at ${encryption_key_file}"
-    fi
+    #if [ ! -r "${encryption_key_file}" ]; then
+    #    error "Cannot read encryption key at ${encryption_key_file}"
+    #fi
 }
 
 set_options () {
     # List the innobackupex arguments
     #declare -ga innobackupex_args=(
+        #"--encrypt=AES256"
+        #"--encrypt-key-file=${encryption_key_file}"
+        #"--encrypt-threads=${processors}"
     innobackupex_args=(
         "--defaults-file=${defaults_file}"
         "--extra-lsndir=${todays_dir}"
         "--compress"
         "--stream=xbstream"
-        "--encrypt=AES256"
-        "--encrypt-key-file=${encryption_key_file}"
+        
         "--parallel=${processors}"
         "--compress-threads=${processors}"
-        "--encrypt-threads=${processors}"
+
         "--slave-info"
         "--incremental"
     )
@@ -73,7 +75,8 @@ take_backup () {
     # Make sure today's backup directory is available and take the actual backup
     mkdir -p "${todays_dir}"
     find "${todays_dir}" -type f -name "*.incomplete" -delete
-    innobackupex "${innobackupex_args[@]}" "${todays_dir}" > "${todays_dir}/${backup_type}-${now}.xbstream.incomplete" 2> "${log_file}"
+    #innobackupex "${innobackupex_args[@]}" "${todays_dir}" > "${todays_dir}/${backup_type}-${now}.xbstream.incomplete" 2> "${log_file}"
+    mariabackup "${innobackupex_args[@]}" "${todays_dir}" > "${todays_dir}/${backup_type}-${now}.xbstream.incomplete" 2> "${log_file}"
     
     mv "${todays_dir}/${backup_type}-${now}.xbstream.incomplete" "${todays_dir}/${backup_type}-${now}.xbstream"
 }

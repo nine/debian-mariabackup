@@ -34,15 +34,18 @@ sanity_check () {
 do_backup () {
     # Apply the logs to each of the backups
     printf "Initial prep of full backup %s\n" "${full_backup_dir}"
-    innobackupex --redo-only --apply-log "${full_backup_dir}"
+    #innobackupex --redo-only --apply-log "${full_backup_dir}"
+    mariabackup --apply-log "${full_backup_dir}"
     
     for increment in "${incremental_dirs[@]}"; do
         printf "Applying incremental backup %s to %s\n" "${increment}" "${full_backup_dir}"
-        innobackupex --redo-only --apply-log --incremental-dir="${increment}" "${full_backup_dir}"
+        #innobackupex --redo-only --apply-log --incremental-dir="${increment}" "${full_backup_dir}"
+        mariabackup --apply-log --incremental-dir="${increment}" "${full_backup_dir}"
     done
     
     printf "Applying final logs to full backup %s\n" "${full_backup_dir}"
-    innobackupex --apply-log "${full_backup_dir}"
+    #innobackupex --apply-log "${full_backup_dir}"
+    mariabackup --apply-log "${full_backup_dir}"
 }
 
 sanity_check && do_backup > "${log_file}" 2>&1
@@ -67,7 +70,7 @@ First, stop MySQL and move or remove the contents of the MySQL data directory:
 Then, recreate the data directory and  copy the backup files:
     
         sudo mkdir /var/lib/mysql
-        sudo innobackupex --copy-back ${PWD}/$(basename "${full_backup_dir}")
+        sudo mariabackup --copy-back ${PWD}/$(basename "${full_backup_dir}")
     
 Afterward the files are copied, adjust the permissions and restart the service:
     

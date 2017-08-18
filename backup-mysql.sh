@@ -44,6 +44,7 @@ set_options () {
     innobackupex_args=(
         "--defaults-file=${defaults_file}"
         "--extra-lsndir=${todays_dir}"
+        "--backup"
         "--compress"
         "--stream=xbstream"
         "--parallel=${processors}"
@@ -75,7 +76,7 @@ take_backup () {
     mkdir -p "${todays_dir}"
     find "${todays_dir}" -type f -name "*.incomplete" -delete
     #innobackupex "${innobackupex_args[@]}" "${todays_dir}" > "${todays_dir}/${backup_type}-${now}.xbstream.incomplete" 2> "${log_file}"
-    mariabackup "${innobackupex_args[@]}" "${todays_dir}" > "${todays_dir}/${backup_type}-${now}.xbstream.incomplete" 2> "${log_file}"
+    mariabackup "${innobackupex_args[@]}" "--target-dir=${todays_dir}" > "${todays_dir}/${backup_type}-${now}.xbstream.incomplete" 2> "${log_file}"
     
     mv "${todays_dir}/${backup_type}-${now}.xbstream.incomplete" "${todays_dir}/${backup_type}-${now}.xbstream"
 }

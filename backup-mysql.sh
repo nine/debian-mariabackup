@@ -38,17 +38,16 @@ set_options () {
         #"--encrypt=AES256"
         #"--encrypt-key-file=${encryption_key_file}"
         #"--encrypt-threads=${processors}"
+        #"--slave-info"
+        #"--incremental"
+        
     innobackupex_args=(
         "--defaults-file=${defaults_file}"
         "--extra-lsndir=${todays_dir}"
         "--compress"
         "--stream=xbstream"
-        
         "--parallel=${processors}"
         "--compress-threads=${processors}"
-
-        "--slave-info"
-        "--incremental"
     )
     
     backup_type="full"

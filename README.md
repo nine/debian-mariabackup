@@ -1,5 +1,5 @@
 # Debian / Ubuntu 16.04 MariaDB backup using mariabackup
-*Currently tested with Debian 8 (jessie)
+*Currently tested with Debian 8 (jessie)*
 
 This repository contains a few scripts for automating backups with mariabackup (a fork of Percona Xtrabackup) by MariaDB.
 

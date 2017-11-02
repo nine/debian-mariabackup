@@ -5,7 +5,7 @@ This repository contains a few scripts for automating backups with mariabackup (
 
 Please check and follow the instructions below. The instructions are taken from <a href="https://www.digitalocean.com/community/tutorials/how-to-configure-mysql-backups-with-percona-xtrabackup-on-ubuntu-16-04">here</a>
 
-##Create a MySQL User with Appropriate Privileges
+## Create a MySQL User with Appropriate Privileges
 
 The first thing we need to do is create a new MySQL user configured to handle backup tasks. We will only give this user the privileges it needs to copy the data safely while the system is running.
 
@@ -24,7 +24,7 @@ mysql> FLUSH PRIVILEGES;
 
 Our MySQL backup user is configured and has the access it requires.
 
-##Display the value of the datadir variable 
+## Display the value of the datadir variable 
 
 ```
 mysql> SELECT @@datadir;
@@ -39,7 +39,7 @@ mysql> SELECT @@datadir;
 
 Take a note of the location you find.
 
-##Configuring a Systems Backup User and Assigning Permissions
+## Configuring a Systems Backup User and Assigning Permissions
 
 Now that we have a MySQL user to perform backups, we will ensure that a corresponding Linux user exists with similar limited privileges.
 
@@ -100,11 +100,11 @@ $ sudo find /var/lib/mysql -type d -exec chmod 750 {} \;
 
 Our backup user now has the access it needs to the MySQL directory.
 
-##Creating the Backup Assets
+## Creating the Backup Assets
 
 Now that MySQL and system backup users are available, we can begin to set up the configuration files, encryption keys, and other assets that we need to successfully create and secure our backups.
 
-###Create a MySQL Configuration File with the Backup Parameters
+### Create a MySQL Configuration File with the Backup Parameters
 
 Begin by creating a minimal MySQL configuration file that the backup script will use. This will contain the MySQL credentials for the MySQL user.
 
@@ -133,7 +133,7 @@ $ sudo chmod 600 /etc/mysql/backup.cnf
 
 The backup user will be able to access this file to get the proper credentials but other users will be restricted.
 
-###Create a Backup Root Directory
+### Create a Backup Root Directory
 
 Next, create a directory for the backup content. We will use ```/backups/mysql``` as the base directory for our backups:
 
@@ -149,7 +149,7 @@ $ sudo chown backup:mysql /backups/mysql
 
 The ```backup``` user should now be able to write backup data to this location.
 
-##Using the Backup and Restore Scripts
+## Using the Backup and Restore Scripts
 
 In order to make our backup and restore steps repeatable, we will script the entire process. We will use the following scripts:
 
@@ -164,7 +164,7 @@ $ chmod +x /tmp/{backup,extract,prepare}-mysql.sh
 $ sudo mv /tmp/{backup,extract,prepare}-mysql.sh /usr/local/bin
 ```
 
-###The backup-mysql.sh Script
+### The backup-mysql.sh Script
 
 The script has the following functionality:
 
@@ -176,7 +176,7 @@ When the script is run, a daily directory is created where timestamped files rep
 
 Backups will generate a file called backup-progress.log in the daily directory with the output from the most recent backup operation. A file called xtrabackup_checkpoints containing the most recent backup metadata will be created there as well. This file is needed to produce future incremental backups, so it is important not to remove it. A file called xtrabackup_info, which contains additional metadata, is also produced but the script does not reference this file.
 
-###The extract-mysql.sh Script
+### The extract-mysql.sh Script
 
 Unlike the backup-mysql.sh script, which is designed to be automated, this script is designed to be used intentionally when you plan to restore from a backup. Because of this, the script expects you to pass in the .xbstream files that you wish to extract.
 
@@ -184,7 +184,7 @@ The script creates a restore directory within the current directory and then cre
 
 After this process has completed, the restore directory should contain directories for each of the provided backups. This allows you to inspect the directories, examine the contents of the backups, and decide which backups you wish to prepare and restore.
 
-###The prepare-mysql.sh Script
+### The prepare-mysql.sh Script
 
 This script will apply the logs to each backup to create a consistent database snapshot. It will apply any incremental backups to the full backup to incorporate the later changes.
 
@@ -194,9 +194,9 @@ Once all of the backups have been combined, the uncommitted transactions are rol
 
 In order to minimize chance of data loss, the script stops short of copying the files into the data directory. This way, the user can manually verify the backup contents and the log file created during this process, and decide what to do with the current contents of the MySQL data directory. The commands needed to restore the files completely are displayed when the command exits.
 
-##Testing the MySQL Backup and Restore Scripts
+## Testing the MySQL Backup and Restore Scripts
 
-###Perform a Full Backup
+### Perform a Full Backup
 
 ```
 $ sudo -u backup backup-mysql.sh
@@ -254,7 +254,7 @@ recover_binlog_info = 0
 
 The example above tells us that a full backup was taken and that the backup covers log sequence number (LSN) 0 to log sequence number 2549956. The last_lsn number indicates that some operations occurred during the backup process.
 
-###Perform an Incremental Backup
+### Perform an Incremental Backup
 
 Now that we have a full backup, we can take additional incremental backups. Incremental backups record the changes that have been made since the last backup was performed. The first incremental backup is based on a full backup and subsequent incremental backups are based on the previous incremental backup.
 
@@ -296,7 +296,7 @@ recover_binlog_info = 0
 
 The backup type is listed as "incremental" and instead of starting from LSN 0 like our full backup, it starts at the LSN where our last backup ended.
 
-###Extract the Backups
+### Extract the Backups
 
 Next, let's extract the backup files to create backup directories. Due to space and security considerations, this should normally only be done when you are ready to restore the data.
 
@@ -340,7 +340,7 @@ full-04-20-2017_14-55-17/  incremental-04-20-2017_17-15-03/
 
 The backup directories contains the raw backup files, but they are not yet in a state that MySQL can use though. To fix that, we need to prepare the files.
 
-###Prepare the Final Backup
+### Prepare the Final Backup
 
 Next, we will prepare the backup files. To do so, you must be in the restore directory that contains the full- and any incremental- backups. The script will apply the changes from any incremental- directories onto the full- backup directory. Afterwards, it will apply the logs to create a consistent dataset that MySQL can use.
 
@@ -377,7 +377,7 @@ The output above indicates that the script thinks that the backup is fully prepa
 
 The script stops short of actually copying the files into MySQL's data directory so that you can verify that everything looks correct.
 
-###Restore the Backup Data to the MySQL Data Directory
+### Restore the Backup Data to the MySQL Data Directory
 
 If you are satisfied that everything is in order after reviewing the logs, you can follow the instructions outlined in the prepare-mysql.sh output.
 
@@ -429,7 +429,7 @@ $ sudo rm -rf /backups/mysql/"$(date +%a)"/restore
 
 The next time we need a clean copies of the backup directories, we can extract them again from the backup files.
 
-##Creating a Cron Job to Run Backups Hourly
+## Creating a Cron Job to Run Backups Hourly
 
 Now that we've verified that the backup and restore process are working smoothly, we should set up a cron job to automatically take regular backups.
 
@@ -472,5 +472,5 @@ Apr 20 18:35:07 myserver backup-mysql[2302]: Backup created at /backups/mysql/Th
 
 Check back in a few hours to make sure that additional backups are being taken.
 
-##Hope this helps! Cheers!
+## Hope this helps! Cheers!
 

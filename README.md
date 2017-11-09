@@ -149,6 +149,24 @@ $ sudo chown backup:mysql /backups/mysql
 
 The ```backup``` user should now be able to write backup data to this location.
 
+## Downloading the Backup and Restore Scripts
+
+You can download the scripts directly from GitHub by typing:
+
+```
+$ cd /tmp
+$ curl -LO https://raw.githubusercontent.com/nullart/debian-ubuntu-mariadb-backup/master/backup-mysql.sh
+$ curl -LO https://raw.githubusercontent.com/nullart/debian-ubuntu-mariadb-backup/master/extract-mysql.sh
+$ curl -LO https://raw.githubusercontent.com/nullart/debian-ubuntu-mariadb-backup/master/prepare-mysql.sh
+```
+
+Be sure to inspect the scripts after downloading to make sure they were retrieved successfully and that you approve of the actions they will perform. If you are satisfied, mark the scripts as executable and then move them into the /usr/local/bin directory by typing:
+
+```
+$ chmod +x /tmp/{backup,extract,prepare}-mysql.sh
+$ sudo mv /tmp/{backup,extract,prepare}-mysql.sh /usr/local/bin
+```
+
 ## Using the Backup and Restore Scripts
 
 In order to make our backup and restore steps repeatable, we will script the entire process. We will use the following scripts:

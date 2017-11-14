@@ -56,7 +56,7 @@ do_extraction () {
         )
 
         #innobackupex "${innobackupex_args[@]}" "${restore_dir}"
-        mariabackup "${innobackupex_args[@]}" "${restore_dir}"
+        mariabackup "${innobackupex_args[@]}" --target-dir="${restore_dir}"
         #find "${restore_dir}" -name "*.xbcrypt" -exec rm {} \;
         find "${restore_dir}" -name "*.qp" -exec rm {} \;
     
